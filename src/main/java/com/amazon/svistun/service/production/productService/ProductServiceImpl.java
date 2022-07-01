@@ -29,7 +29,9 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
 
 
-    public ProductServiceImpl(ProductRepository productRepository, BrandRepository brandRepository, CategoryRepository categoryRepository) {
+    public ProductServiceImpl(ProductRepository productRepository,
+                              BrandRepository brandRepository,
+                              CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
         this.brandRepository = brandRepository;
         this.categoryRepository = categoryRepository;
@@ -40,7 +42,9 @@ public class ProductServiceImpl implements ProductService {
         List<Product> product = productRepository.findAll();
         List<ProductDto> productDtoList = new ArrayList<>();
         for (Product fromProduct : product) {
-            productDtoList.add(productBeanUtils(fromProduct, fromProduct.getCategory(), fromProduct.getBrand(), fromProduct.getStocks()));
+            productDtoList.add(productBeanUtils(fromProduct, fromProduct.getCategory(),
+                    fromProduct.getBrand(),
+                    fromProduct.getStocks()));
 
         }
         return productDtoList;
@@ -49,7 +53,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductDto getProductById(Long id) {
         Product product = productRepository.getByProductId(id);
-        return productBeanUtils(product, product.getCategory(), product.getBrand(), product.getStocks());
+
+        return productBeanUtils(product, product.getCategory(),
+                product.getBrand(), product.getStocks());
     }
 
 
@@ -57,8 +63,15 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductDto> getProductByCategory_CategoryName(String categoryName) {
         List<Product> product = productRepository.getProductByCategory_CategoryName(categoryName);
         List<ProductDto> productDtoList = new ArrayList<>();
-        for (Product fromProduct : product) {
-            productDtoList.add(productBeanUtils(fromProduct, fromProduct.getCategory(), fromProduct.getBrand(), fromProduct.getStocks()));
+        if (productRepository.existsProductByCategoryCategoryName(categoryName)) {
+            for (Product fromProduct : product) {
+                productDtoList.add(productBeanUtils(fromProduct,
+                        fromProduct.getCategory(),
+                        fromProduct.getBrand(),
+                        fromProduct.getStocks()));
+            }
+        } else {
+            log.error("There is no product in this {} category or the product has been removed", categoryName);
         }
         return productDtoList;
     }
@@ -67,9 +80,15 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductDto> getProductByBrand_BrandName(String brandName) {
         List<Product> product = productRepository.getProductByBrand_BrandName(brandName);
         List<ProductDto> productDtoList = new ArrayList<>();
-        for (Product fromProduct : product) {
-            productDtoList.add(productBeanUtils(fromProduct, fromProduct.getCategory(), fromProduct.getBrand(), fromProduct.getStocks()));
+        if (productRepository.existsProductByBrandBrandName(brandName)) {
+            for (Product fromProduct : product) {
+                productDtoList.add(productBeanUtils(fromProduct, fromProduct.getCategory(), fromProduct.getBrand(), fromProduct.getStocks()));
+            }
         }
+        else {
+            log.error("The {} brand does not exist or the product of this brand has been removed", brandName);
+        }
+
         return productDtoList;
     }
 
@@ -134,30 +153,34 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public void deleteProductByProductId(Long id) {
-        productRepository.deleteProductByProductId(id);
+    public void deleteProductByProductId(@NotNull Long id) {
+        if (productRepository.existsById(id)) {
+            productRepository.deleteProductByProductId(id);
+            log.info("Product with id = {} deleted", id);
+        } else {
+            log.error("There is no product with id = {} or it was deleted", id);
+        }
     }
 
 
-    public ProductDto productBeanUtils(@NotNull Product product, Category category, Brand brand, @NotNull List<Stocks> stocks) {
+    public ProductDto productBeanUtils(@NotNull Product product,
+                                       Category category,
+                                       Brand brand,
+                                       @NotNull List<Stocks> stocks) {
         ProductDto productDto = new ProductDto();
         BrandDto brandDto = new BrandDto();
         CategoryDto categoryDto = new CategoryDto();
         StocksDto stocksDto = new StocksDto();
-
         BeanUtils.copyProperties(category, categoryDto);
         BeanUtils.copyProperties(brand, brandDto);
         BeanUtils.copyProperties(product, productDto);
 
-
         for (Stocks stock : stocks) {
             BeanUtils.copyProperties(stock, stocksDto);
         }
-
         productDto.setBrand(brandDto);
         productDto.setCategory(categoryDto);
         productDto.setStocks(stocksDto);
-
         return productDto;
     }
 
