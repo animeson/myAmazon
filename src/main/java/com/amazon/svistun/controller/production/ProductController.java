@@ -1,7 +1,7 @@
 package com.amazon.svistun.controller.production;
 
+import com.amazon.svistun.dto.production.request.ProductEditDto;
 import com.amazon.svistun.dto.production.request.ProductRequestDto;
-import com.amazon.svistun.dto.production.response.ProductDto;
 import com.amazon.svistun.service.production.productService.ProductServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -22,9 +22,9 @@ public class ProductController {
         return ResponseEntity.ok(productService.getAllProduct());
     }
 
-    @GetMapping("id/{id}")
-    public ResponseEntity<?> getProductById(@PathVariable Long id ) {
-        return ResponseEntity.ok(productService.getProductById(id));
+    @GetMapping("/{productName}")
+    public ResponseEntity<?> getProductByProductName(@PathVariable String productName ) {
+        return ResponseEntity.ok(productService.getProductByProductName(productName));
     }
 
     @GetMapping("category/{categoryName}")
@@ -40,19 +40,18 @@ public class ProductController {
 
 
     @PostMapping
-    public void addProduct(@RequestBody ProductRequestDto product){
-        productService.addProduct(product);
+    public ResponseEntity<?> addProduct(@RequestBody ProductRequestDto product){
+        return ResponseEntity.ok().body(productService.addProduct(product));
     }
 
-    @PatchMapping("edit/{id}")
-    public void editProduct(@RequestBody ProductRequestDto product,
-                            @PathVariable Long id){
-        productService.editProduct(product, id);
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> editProduct(@RequestBody ProductEditDto product,
+                                         @PathVariable Long id){
+        return ResponseEntity.ok().body(productService.editProduct(product, id));
     }
 
-    @DeleteMapping("delete/{id}")
+    @DeleteMapping("/{id}")
     public void deleteProduct(@PathVariable Long id){
-
         productService.deleteProductByProductId(id);
     }
 }

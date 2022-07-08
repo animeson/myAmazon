@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface CustomerService {
-    void createClient(CustomerDto customerDto);
+    Customer createClient(CustomerDto customerDto);
     Customer getClientById(Long id);
+    Customer updateClient(Long id, CustomerDto customerDto);
 }

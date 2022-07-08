@@ -10,7 +10,6 @@ import java.util.List;
 @Service
 public interface BrandService {
     List<Brand> getAllBrand();
-    Brand getBrandByBrandId(Long brandId);
     void deleteBrandById(Long brandId);
     void createBrand(BrandDto brandDto);
     void updateBrandById(Long brandId, BrandDto brandDto);

@@ -13,6 +13,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Product getByProductId(Long id);
     List <Product> getProductByCategory_CategoryName(String categoryName);
     List<Product> getProductByBrand_BrandName(String brandName);
+    List<Product> getProductByProductName(String productName);
+    Boolean existsProductByProductName(String productName);
 
     void deleteProductByProductId(Long productId);
     Boolean existsProductByCategoryCategoryName(String productName);

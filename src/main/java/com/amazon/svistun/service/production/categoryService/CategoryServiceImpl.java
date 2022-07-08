@@ -28,6 +28,12 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public Category getCategoryByCategoryName(String categoryName) {
+        return categoryRepository.getByCategoryName(categoryName);
+    }
+
+
+    @Override
     @Transactional
     public void addCategory(@NotNull CategoryDto categoryDto) {
         Category category = new Category();

@@ -1,5 +1,6 @@
 package com.amazon.svistun.service.production.productService;
 
+import com.amazon.svistun.dto.production.request.ProductEditDto;
 import com.amazon.svistun.dto.production.request.ProductRequestDto;
 import com.amazon.svistun.dto.production.response.BrandDto;
 import com.amazon.svistun.dto.production.response.CategoryDto;
@@ -51,15 +52,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDto getProductById(Long id) {
-        Product product = productRepository.getByProductId(id);
-
-        return productBeanUtils(product, product.getCategory(),
-                product.getBrand(), product.getStocks());
-    }
-
-
-    @Override
     public List<ProductDto> getProductByCategory_CategoryName(String categoryName) {
         List<Product> product = productRepository.getProductByCategory_CategoryName(categoryName);
         List<ProductDto> productDtoList = new ArrayList<>();
@@ -84,8 +76,7 @@ public class ProductServiceImpl implements ProductService {
             for (Product fromProduct : product) {
                 productDtoList.add(productBeanUtils(fromProduct, fromProduct.getCategory(), fromProduct.getBrand(), fromProduct.getStocks()));
             }
-        }
-        else {
+        } else {
             log.error("The {} brand does not exist or the product of this brand has been removed", brandName);
         }
 
@@ -93,8 +84,23 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<ProductDto> getProductByProductName(String productName) {
+        List<Product> product = productRepository.getProductByProductName(productName);
+        List<ProductDto> productDtoList = new ArrayList<>();
+        if (productRepository.existsProductByProductName(productName)) {
+            for (Product fromProduct : product) {
+                productDtoList.add(productBeanUtils(fromProduct, fromProduct.getCategory(), fromProduct.getBrand(), fromProduct.getStocks()));
+            }
+        } else {
+            log.error("The {} brand does not exist or the product of this brand has been removed", productName);
+        }
+
+        return productDtoList;
+    }
+
+    @Override
     @Transactional
-    public void addProduct(@NotNull ProductRequestDto productRequestDto) {
+    public Product addProduct(@NotNull ProductRequestDto productRequestDto) {
         Product product = new Product();
         Brand brand = new Brand();
         Category category = new Category();
@@ -116,38 +122,26 @@ public class ProductServiceImpl implements ProductService {
 
         product.setCategory(category);
         product.setBrand(brand);
-        productRepository.save(product);
+        return productRepository.save(product);
     }
 
     @Override
     @Transactional
-    public void editProduct(@NotNull ProductRequestDto productRequestDto, Long editProductId) {
+    public Product editProduct(@NotNull ProductEditDto productEditDto, Long editProductId) {
         Product product = productRepository.getByProductId(editProductId);
+        if (editProductId != null && categoryRepository.existsById(editProductId)) {
 
-        Brand brand = new Brand();
-        Category category = new Category();
+            if (productEditDto.getListPrice() != null && productEditDto.getListPrice() >= 0) {
+                product.setListPrice(productEditDto.getListPrice());
 
-        if (brandRepository.getByBrandName(productRequestDto.getBrandName()) == null) {
-            brand.setBrandName(productRequestDto.getBrandName());
-            brandRepository.save(brand);
+            } else {
+                log.error("The price of the product cannot be null or less than zero");
+            }
         } else {
-            brand = brandRepository.getByBrandName(productRequestDto.getBrandName());
+            log.error("There is no product with id= {} or it was deleted", editProductId);
         }
 
-        if (categoryRepository.getByCategoryName(productRequestDto.getCategoryName()) == null) {
-            category.setCategoryName(productRequestDto.getCategoryName());
-            categoryRepository.save(category);
-        } else {
-            category = categoryRepository.getByCategoryName(productRequestDto.getCategoryName());
-        }
-
-
-        product.setBrand(brand);
-        product.setCategory(category);
-
-        BeanUtils.copyProperties(productRequestDto, product);
-
-        productRepository.save(product);
+        return productRepository.save(product);
 
     }
 

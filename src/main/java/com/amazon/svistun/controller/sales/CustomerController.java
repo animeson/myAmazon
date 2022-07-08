@@ -2,6 +2,7 @@ package com.amazon.svistun.controller.sales;
 
 
 import com.amazon.svistun.dto.sales.CustomerDto;
+import com.amazon.svistun.entity.sales.Customer;
 import com.amazon.svistun.service.sales.customerService.CustomerServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -25,6 +26,13 @@ public class CustomerController {
     @PostMapping
     public void createClient(@RequestBody CustomerDto customerDto){
         clientService.createClient(customerDto);
+    }
+
+    @PatchMapping("/{id}")
+    public Customer editClient(@PathVariable Long id,
+                               @RequestBody CustomerDto customerDto) {
+
+        return clientService.updateClient(id,customerDto);
     }
 
 

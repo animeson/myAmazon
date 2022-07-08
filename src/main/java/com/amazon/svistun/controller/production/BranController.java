@@ -23,11 +23,6 @@ public class BranController {
         return brandService.getAllBrand();
     }
 
-    @GetMapping("id/{id}")
-    private Brand getBrandByBrandId(@PathVariable Long id) {
-        return brandService.getBrandByBrandId(id);
-    }
-
     @PostMapping
     public void createBrand(@RequestBody BrandDto brandDto) {
         brandService.createBrand(brandDto);

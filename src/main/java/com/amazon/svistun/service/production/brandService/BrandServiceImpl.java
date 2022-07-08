@@ -27,14 +27,6 @@ public class BrandServiceImpl implements BrandService {
     }
 
     @Override
-    public Brand getBrandByBrandId(Long brandId) {
-        if (!brandRepository.existsById(brandId)) {
-            log.error("There is no brand with id = {}, or it has been removed", brandId);
-        }
-        return brandRepository.getBrandByBrandId(brandId);
-    }
-
-    @Override
     @Transactional
     public void deleteBrandById(Long brandId) {
         if (brandRepository.existsById(brandId)) {
